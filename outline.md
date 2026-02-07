@@ -14,7 +14,7 @@ Sense is an analog input used to measure the current on the WS2812 VCC line
 
 ## Test
 
-A number of different tests is being implemented.
+A number of different tests are being implemented.
 
 1) Reset time test: Measures how long the data in line must be left idle to reset the WS2812 state machine.
 

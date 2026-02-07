@@ -4,7 +4,10 @@ Automated characterization of WS2812-family addressable LEDs using a CH32V003 mi
 
 The firmware drives a single WS2812 from the CH32V003's timer and DMA peripherals, measures the LED's response, and streams structured results over the debug interface. A companion Python GUI parses the logs and presents timing plots, current sweeps, and derived metrics.
 
-![Example analyzer output for WS2812B](exampleplot.png)
+---
+> **Note**: This project including firmware, analyzer and documentation (excluding this note) was fully generated with Agentic AI: Claude Code (Opus 4.6) and Codex (GPT-5.3-Codex) based on the instructions in outline.md and subsequential prompting. The measurements were, of course, performed manually. Take note that the PWM frequency test can be inaccurate under some circumstances.
+---
+
 
 ## What It Measures
 
@@ -14,6 +17,10 @@ The firmware drives a single WS2812 from the CH32V003's timer and DMA peripheral
 | **Reset time** | Linear scan for the minimum idle gap that resets the LED's shift register | Reset threshold in us |
 | **PWM frequency** | Lights one LED channel and measures the supply current waveform with ADC + autocorrelation (two-pass: fast then slow fallback) | Internal PWM frequency in Hz |
 | **LED current** | Sweeps each color channel across 39 duty steps, measuring average VCC shunt-drop at each point | Per-channel I vs duty curve, on-current, linearity |
+
+### Example Output for original WS2812B 
+![Example analyzer output for WS2812B](exampleplot.png)
+
 
 ## Hardware Setup
 
