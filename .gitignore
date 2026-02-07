@@ -1,0 +1,11 @@
+# Build artifacts
+*.elf
+*.bin
+*.hex
+*.lst
+*.map
+*.o
+*.d
+generated__.ld
+CLAUDE.md
+.claude/

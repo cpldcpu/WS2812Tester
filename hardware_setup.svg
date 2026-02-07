@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-42 0 662 310" font-family="Consolas, 'Courier New', monospace" font-size="13">
+  <defs>
+    <marker id="arr" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5 Z" fill="#555"/>
+    </marker>
+  </defs>
+  <style>
+    .box   { fill: #fff; stroke: #333; stroke-width: 1.5; rx: 5; }
+    .lbl   { font-size: 14px; font-weight: bold; fill: #222; }
+    .sub   { font-size: 11px; fill: #777; }
+    .pin   { font-size: 11px; fill: #555; }
+    .sig   { font-size: 11px; fill: #07855e; font-weight: bold; }
+    .comp  { font-size: 11px; fill: #555; }
+    .w     { stroke: #555; stroke-width: 1.4; fill: none; }
+    .wv    { stroke: #c33; stroke-width: 1.6; fill: none; }
+    .wg    { stroke: #555; stroke-width: 1.8; fill: none; }
+    .dot   { fill: #555; }
+    .zig   { stroke: #555; stroke-width: 1.4; fill: none; }
+    .rail  { font-size: 12px; font-weight: bold; }
+  </style>
+
+  <!-- ===== Background ===== -->
+  <rect x="-42" y="0" width="662" height="310" fill="#fff" rx="6"/>
+
+  <!-- ===== VCC rail (top) ===== -->
+  <line class="wv" x1="20" y1="24" x2="590" y2="24"/>
+  <text class="rail" x="12" y="28" text-anchor="end" fill="#c33">VCC</text>
+
+  <!-- ===== GND rail (bottom) ===== -->
+  <line class="wg" x1="20" y1="276" x2="590" y2="276"/>
+  <text class="rail" x="12" y="280" text-anchor="end" fill="#555">GND</text>
+
+  <!-- ===== R_sense in series: VCC → R → node A → WS2812 VCC ===== -->
+  <!-- VCC down to resistor top -->
+  <line class="wv" x1="140" y1="24" x2="140" y2="38"/>
+  <circle class="dot" cx="140" cy="24" r="2.5"/>
+
+  <!-- Zigzag resistor -->
+  <polyline class="zig" points="140,38 134,44 146,50 134,56 146,62 134,68 146,74 140,80"/>
+
+  <!-- Label -->
+  <text class="comp" x="155" y="56" text-anchor="start">R_sense</text>
+  <text class="comp" x="155" y="69" text-anchor="start">47 Ohm</text>
+
+  <!-- Node A: bottom of resistor, junction point -->
+  <line class="wv" x1="140" y1="80" x2="140" y2="96"/>
+  <circle class="dot" cx="140" cy="96" r="2.5"/>
+
+  <!-- Node A → WS2812 VCC (down into box) -->
+  <line class="wv" x1="140" y1="96" x2="140" y2="116"/>
+
+  <!-- ===== WS2812 box ===== -->
+  <rect class="box" x="68" y="116" width="144" height="136"/>
+  <text class="lbl" x="140" y="140" text-anchor="middle">WS2812</text>
+  <text class="sub" x="140" y="155" text-anchor="middle">(DUT)</text>
+
+  <!-- WS2812 GND -->
+  <line class="wg" x1="140" y1="252" x2="140" y2="276"/>
+  <circle class="dot" cx="140" cy="276" r="2.5"/>
+
+  <!-- ===== CH32V003 box ===== -->
+  <rect class="box" x="400" y="76" width="170" height="176"/>
+  <text class="lbl" x="485" y="100" text-anchor="middle">CH32V003</text>
+  <text class="sub" x="485" y="115" text-anchor="middle">SOIC-8</text>
+
+  <!-- CH32V003 VCC (direct from rail, not through R_sense) -->
+  <line class="wv" x1="500" y1="24" x2="500" y2="76"/>
+  <circle class="dot" cx="500" cy="24" r="2.5"/>
+
+  <!-- CH32V003 GND -->
+  <line class="wg" x1="500" y1="252" x2="500" y2="276"/>
+  <circle class="dot" cx="500" cy="276" r="2.5"/>
+
+  <!-- ===== Sense: node A → PA2 ===== -->
+  <line class="w" x1="140" y1="96" x2="400" y2="96"/>
+  <text class="pin" x="405" y="93" text-anchor="start">PA2 (pin 3)</text>
+  <text class="sig" x="270" y="89" text-anchor="middle">Sense (ADC ch0)</text>
+
+  <!-- ===== DiN: PA1 → WS2812 ===== -->
+  <line class="w" x1="212" y1="190" x2="400" y2="190"/>
+  <!-- Pin labels on correct sides -->
+  <text class="pin" x="207" y="194" text-anchor="end">DiN</text>
+  <text class="pin" x="405" y="187" text-anchor="start">PA1 (pin 1)</text>
+  <!-- Signal label + arrow MCU→LED -->
+  <text class="sig" x="306" y="183" text-anchor="middle">T1CH2 (PWM out)</text>
+  <line x1="345" y1="194" x2="265" y2="194" stroke="#555" stroke-width="1" marker-end="url(#arr)"/>
+
+  <!-- ===== Dout: WS2812 → PC4 ===== -->
+  <line class="w" x1="212" y1="226" x2="400" y2="226"/>
+  <text class="pin" x="207" y="230" text-anchor="end">Dout</text>
+  <text class="pin" x="405" y="223" text-anchor="start">PC4 (pin 7)</text>
+  <!-- Signal label + arrow LED→MCU -->
+  <text class="sig" x="306" y="219" text-anchor="middle">T1CH3/4 (capture)</text>
+  <line x1="265" y1="230" x2="345" y2="230" stroke="#555" stroke-width="1" marker-end="url(#arr)"/>
+
+  <!-- ===== Footer ===== -->
+  <text x="310" y="300" text-anchor="middle" font-size="10" fill="#aaa">WS2812 Tester — Hardware Setup</text>
+</svg>
