@@ -5,7 +5,9 @@ A quick summary of findings after testing various ARGB LEDs using the [WS2812 te
 ## Worldsemi WS2812
 
 ### WS2812B (Original from 2014)
-![WS2812B analysis](WS2812B_original.png)
+<div style="text-align: center;">
+<img src="ws2812B_original.png" />
+</div>
 
 - Excellent signal regeneration with a very sharp transition from Lo to Hi timing (see [in-depth investigation](https://cpldcpu.github.io/2014/01/14/light_ws2812-library-v2-0-part-i-understanding-the-ws2812/)).
 - PWM is 432 Hz (flickery).
