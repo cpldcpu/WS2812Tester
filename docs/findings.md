@@ -12,7 +12,7 @@ A quick summary of findings after testing various ARGB LEDs using the [WS2812 te
 - Excellent signal regeneration with a very sharp transition from Lo to Hi timing (see [in-depth investigation](https://cpldcpu.github.io/2014/01/14/light_ws2812-library-v2-0-part-i-understanding-the-ws2812/)).
 - PWM is 432 Hz (flickery).
 - Reset timing is very short (unstable).
-- Nonlinear PWM behavior (see [description](https://cpldcpu.github.io/2022/08/15/does-the-ws2812-have-integrated-gamma-correction/)).
+- Nonlinear PWM behavior (see [investigation here](https://cpldcpu.github.io/2022/08/15/does-the-ws2812-have-integrated-gamma-correction/)).
 
 
 ### WS2812B-V5
