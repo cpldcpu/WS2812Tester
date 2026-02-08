@@ -79,23 +79,6 @@ testlogs/
   *.png                 Optional device photos (matched by filename)
 ```
 
-## Test Results
-
-| Device | Manufacturer | Order | Reset (us) | PWM (Hz) | I_max/ch (mA) |
-|--------|-------------|-------|-----------|----------|---------------|
-| WS2812B | Worldsemi | GRB | 10 | 432 | 19.9 |
-| WS2812B-B | Worldsemi | GRB | 238 | 2074 | 16.4 |
-| WS2812D-F5 | Worldsemi | RGB | 122 | 2032 | 18.2 |
-| WS2812E | Worldsemi | GRB | 244 | 2047 | 17.5 |
-| WS2812E-V5 | Worldsemi | GRB | 230 | 541 | 14.6 |
-| SK6112-RG | Opsco | RGB | 204 | 1675 | 13.8 |
-| SK6812 | Opsco | GRB | 44 | 1155 | 11.4 |
-| TX1812CXA | TCWIN | GRB | 60 | 1336 | 12.0 |
-| TX1812CXD | TCWIN | GRB | 70 | 741 | 15.8 |
-| TX1818CXJ | TCWIN | RGB | 60 | 2854 | 8.2 |
-| LTST-G563 | LITEON | RGB | 50 | 2928 | 7.3 |
-| DY-S505016 | TONYU | GRB | 64 | 935 | 12.9 |
-
 ## Requirements
 
 - **Firmware**: `riscv64-unknown-elf-gcc` toolchain, WCH-LinkE programmer
