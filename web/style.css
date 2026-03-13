@@ -170,7 +170,7 @@ header h1 {
 }
 .device-image {
     flex-shrink: 0;
-    max-width: 260px;
+    width: 260px;
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -179,6 +179,21 @@ header h1 {
     display: block;
     width: 100%;
     height: auto;
+}
+.image-placeholder {
+    width: 260px;
+    height: 180px;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--border);
+}
+.image-placeholder span {
+    font-size: 0.78rem;
+    color: var(--text-muted);
 }
 
 /* Info table */

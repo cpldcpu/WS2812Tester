@@ -84,12 +84,14 @@ function renderDeviceDetail(dev) {
     const infoRow = document.createElement("div");
     infoRow.className = "info-row";
 
+    const imgWrap = document.createElement("div");
+    imgWrap.className = "device-image";
     if (dev.image) {
-        const imgWrap = document.createElement("div");
-        imgWrap.className = "device-image";
         imgWrap.innerHTML = `<img src="${dev.image}" alt="${typeName}" loading="lazy">`;
-        infoRow.appendChild(imgWrap);
+    } else {
+        imgWrap.innerHTML = `<div class="image-placeholder"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span>No image</span></div>`;
     }
+    infoRow.appendChild(imgWrap);
 
     // Build grouped info sections
     const groups = [];
