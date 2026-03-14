@@ -31,6 +31,14 @@ let allDevices = [];
 function renderSidebar(devices) {
     const ul = document.getElementById("device-list");
 
+    // Overview link
+    const overviewLi = document.createElement("li");
+    overviewLi.className = "nav-overview";
+    overviewLi.dataset.name = "";
+    overviewLi.textContent = "Overview";
+    overviewLi.addEventListener("click", () => { location.hash = ""; });
+    ul.appendChild(overviewLi);
+
     // Group devices by manufacturer
     const groups = new Map();
     for (const dev of devices) {
@@ -87,9 +95,81 @@ function navigate() {
             return;
         }
     }
-    // No selection or invalid hash — show welcome
+    // No selection — show summary table
     updateActiveNav("");
-    panel.innerHTML = '<div id="welcome"><div class="welcome-icon">&larr;</div><p>Select a device from the list<br>to view its test results.</p></div>';
+    renderSummaryTable(panel);
+}
+
+// ── Summary table ──
+function renderSummaryTable(panel) {
+    panel.innerHTML = "";
+
+    const wrap = document.createElement("div");
+    wrap.className = "summary-page";
+    wrap.innerHTML = `<h2>Device Overview</h2>`;
+
+    const table = document.createElement("table");
+    table.className = "overview-table";
+    table.innerHTML = `<thead><tr>
+        <th></th>
+        <th>Manufacturer</th>
+        <th>Device</th>
+        <th>0/1 Threshold</th>
+        <th>Reset</th>
+        <th>Channel Order</th>
+        <th>I<sub>on</sub></th>
+        <th>I<sub>standby</sub></th>
+        <th>PWM Transfer</th>
+    </tr></thead>`;
+
+    const tbody = document.createElement("tbody");
+    for (const dev of allDevices) {
+        const info = dev.device_info || {};
+        const typeName = info.Type || dev.name;
+        const chOrder = (info["Channel Order"] || dev.channel_order || "GRB").toUpperCase();
+        const transfer = getTransferInfo(dev);
+
+        const cells = [
+            "",  // image placeholder
+            info.Manufacturer || "",
+            `<a class="overview-device-link" href="#${dev.name}">${typeName}</a>`,
+            dev.txh && dev.txh.transition_ns != null ? fmt(dev.txh.transition_ns, 0) + " ns" : "",
+            dev.reset && dev.reset.threshold_us != null ? fmt(dev.reset.threshold_us, 0) + " &micro;s" : "",
+            renderChannelBadges(chOrder),
+            dev.pwm && dev.pwm.i_on_ma != null ? fmt(dev.pwm.i_on_ma, 2) + " mA" : "",
+            dev.pwm && dev.pwm.i_off_ma != null ? fmt(dev.pwm.i_off_ma, 2) + " mA" : "",
+            transfer ? transfer.label : "",
+        ];
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = cells.map(c => `<td>${c}</td>`).join("");
+
+        // Replace first cell with image + lightbox
+        const imgTd = tr.cells[0];
+        imgTd.className = "overview-img-cell";
+        if (dev.image) {
+            imgTd.innerHTML = "";
+            const img = document.createElement("img");
+            img.src = dev.image;
+            img.alt = typeName;
+            img.loading = "lazy";
+            img.className = "overview-thumb";
+            img.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const overlay = document.createElement("div");
+                overlay.className = "lightbox";
+                overlay.innerHTML = `<img src="${dev.image}" alt="${typeName}">`;
+                overlay.addEventListener("click", () => overlay.remove());
+                document.body.appendChild(overlay);
+            });
+            imgTd.appendChild(img);
+        }
+
+        tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    panel.appendChild(wrap);
 }
 
 // ── Helpers ──

@@ -44,6 +44,8 @@ header {
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    text-decoration: none;
+    color: inherit;
 }
 .header-logo {
     width: 32px;
@@ -87,6 +89,24 @@ header h1 {
     padding: 0.6rem 0;
 }
 #device-list { list-style: none; }
+
+/* Overview link */
+.nav-overview {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 0.86rem;
+    font-weight: 600;
+    border-left: 3px solid transparent;
+    transition: all var(--transition);
+    margin-bottom: 0.3rem;
+    border-bottom: 1px solid var(--border);
+}
+.nav-overview:hover { background: var(--accent-light); }
+.nav-overview.active {
+    background: var(--accent-light);
+    border-left-color: var(--accent);
+    color: var(--accent);
+}
 
 /* Manufacturer group */
 .nav-group { list-style: none; }
@@ -182,6 +202,58 @@ header h1 {
 }
 #welcome p {
     font-size: 0.95rem;
+}
+
+/* ── Summary / overview table ── */
+.summary-page h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+.overview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+}
+.overview-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    padding: 0.5rem 0.6rem;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+}
+.overview-table td {
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+.overview-table tbody tr:hover {
+    background: var(--accent-light);
+}
+.overview-img-cell {
+    width: 40px;
+    padding: 0.25rem 0.4rem !important;
+}
+.overview-thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: zoom-in;
+    display: block;
+}
+.overview-device-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+.overview-device-link:hover {
+    text-decoration: underline;
 }
 
 /* ── Device detail ── */
