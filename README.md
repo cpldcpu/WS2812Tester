@@ -1,6 +1,6 @@
 # WS2812 Tester
 
-**[Online database](https://cpldcpu.github.io/WS2812Tester)**
+**[Online RGB-LED database](https://cpldcpu.github.io/WS2812Tester)**
 
 Automated characterization of WS2812-family addressable LEDs using a CH32V003 microcontroller.
 
