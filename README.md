@@ -9,7 +9,6 @@ The firmware drives a single WS2812 from the CH32V003's timer and DMA peripheral
 *Why is this useful?* There is no standardized WS2812 RGB LEDs. Worldsemi, the original manufacturer, went through many iterations to optimize the design of their control IC. In addition, there are many clones that were implemented in similar, but slightly different ways. Analyzing the timing behavior of the data interface and the characteristics of the PWM engine allows to fingerprint different variants and understand their performance and limitations.
 
 > This project was conceptualized by @cpldcpu and was then fully implemented with Agentic AI, Claude Code (Opus 4.6) and Codex (GPT-5.3-Codex), based on the instructions in outline.md and subsequential prompting. The measurements were, of course, performed manually. 
----
 
 ## What It Measures
 
