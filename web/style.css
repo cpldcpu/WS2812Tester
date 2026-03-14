@@ -33,21 +33,38 @@ body {
 header {
     background: var(--header-bg);
     color: var(--header-fg);
-    padding: 1rem 1.5rem;
+    padding: 1.1rem 1.5rem;
     flex-shrink: 0;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     position: relative;
     z-index: 10;
+    border-bottom: 2px solid transparent;
+    border-image: linear-gradient(90deg, #d62728, #2ca02c, #1f77b4, transparent 50%) 1;
 }
 header h1 {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
 }
+.header-led {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 1px;
+}
+.header-led:last-of-type { margin-right: 0.55rem; }
+.header-led-r { background: #d62728; box-shadow: 0 0 6px #d62728aa; }
+.header-led-g { background: #2ca02c; box-shadow: 0 0 6px #2ca02caa; }
+.header-led-b { background: #1f77b4; box-shadow: 0 0 6px #1f77b4aa; }
 .subtitle {
     color: rgba(255,255,255,0.5);
     font-size: 0.8rem;
-    margin-top: 0.1rem;
+    margin-top: 0.15rem;
+    padding-left: 1.85rem;
 }
 .subtitle a {
     color: rgba(255,255,255,0.65);
@@ -79,23 +96,65 @@ header h1 {
     padding: 0.6rem 0;
 }
 #device-list { list-style: none; }
-#device-list li {
-    padding: 0.55rem 1rem 0.55rem 1.1rem;
+
+/* Manufacturer group */
+.nav-group { list-style: none; }
+.nav-group-header {
+    padding: 0.45rem 1rem 0.45rem 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    user-select: none;
+    transition: color var(--transition);
+}
+.nav-group-header:hover { color: var(--text); }
+.nav-group-header:not(:hover) .nav-group-arrow { color: var(--accent); }
+.nav-group-arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+    transition: transform var(--transition);
+    flex-shrink: 0;
+}
+.nav-group.collapsed .nav-group-arrow {
+    transform: rotate(-90deg);
+}
+.nav-group-items {
+    list-style: none;
+    overflow: hidden;
+    max-height: 500px;
+    transition: max-height 0.25s ease;
+}
+.nav-group.collapsed .nav-group-items {
+    max-height: 0;
+}
+
+/* Device items */
+.nav-group-items li {
+    padding: 0.4rem 1rem 0.4rem 1.5rem;
     cursor: pointer;
     font-size: 0.86rem;
     border-left: 3px solid transparent;
     transition: all var(--transition);
     position: relative;
 }
-#device-list li:hover {
+.nav-group-items li:hover {
     background: var(--accent-light);
 }
-#device-list li.active {
+.nav-group-items li.active {
     background: var(--accent-light);
     border-left-color: var(--accent);
     font-weight: 600;
 }
-#device-list li.active::after {
+.nav-group-items li.active::after {
     content: "";
     position: absolute;
     right: 0;
@@ -103,13 +162,6 @@ header h1 {
     transform: translateY(-50%);
     border: 5px solid transparent;
     border-right-color: var(--bg);
-}
-#device-list .nav-manufacturer {
-    display: block;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    font-weight: 400;
-    margin-top: 0.05rem;
 }
 
 /* ── Detail panel ── */

@@ -30,19 +30,46 @@ let allDevices = [];
 // ── Sidebar ──
 function renderSidebar(devices) {
     const ul = document.getElementById("device-list");
+
+    // Group devices by manufacturer
+    const groups = new Map();
     for (const dev of devices) {
         const info = dev.device_info || {};
-        const li = document.createElement("li");
-        li.dataset.name = dev.name;
-        li.innerHTML = `${info.Type || dev.name}<span class="nav-manufacturer">${info.Manufacturer || ""}</span>`;
-        li.addEventListener("click", () => { location.hash = dev.name; });
-        ul.appendChild(li);
+        const mfr = info.Manufacturer || "Other";
+        if (!groups.has(mfr)) groups.set(mfr, []);
+        groups.get(mfr).push(dev);
+    }
+
+    for (const [mfr, devs] of groups) {
+        const groupLi = document.createElement("li");
+        groupLi.className = "nav-group";
+        groupLi.innerHTML = `<div class="nav-group-header"><span class="nav-group-arrow"></span>${mfr}</div>`;
+        const subUl = document.createElement("ul");
+        subUl.className = "nav-group-items";
+        for (const dev of devs) {
+            const info = dev.device_info || {};
+            const li = document.createElement("li");
+            li.dataset.name = dev.name;
+            li.textContent = info.Type || dev.name;
+            li.addEventListener("click", () => { location.hash = dev.name; });
+            subUl.appendChild(li);
+        }
+        groupLi.appendChild(subUl);
+        groupLi.querySelector(".nav-group-header").addEventListener("click", () => {
+            groupLi.classList.toggle("collapsed");
+        });
+        ul.appendChild(groupLi);
     }
 }
 
 function updateActiveNav(name) {
-    document.querySelectorAll("#device-list li").forEach(li => {
+    document.querySelectorAll("#device-list li[data-name]").forEach(li => {
         li.classList.toggle("active", li.dataset.name === name);
+        if (li.dataset.name === name) {
+            // Ensure parent group is expanded
+            const group = li.closest(".nav-group");
+            if (group) group.classList.remove("collapsed");
+        }
     });
 }
 
@@ -222,7 +249,7 @@ function renderTimingPlot(dev, divId) {
         title: { text: "Bit Timing Sweep", font: { size: 14 } },
         xaxis: { title: "Din Pulse Duration [ns]", range: [0, 1350], dtick: 200 },
         yaxis: { title: "Delay & Output Duration [ns]", range: [0, 1350], dtick: 200 },
-        margin: { l: 60, r: 20, t: 40, b: 50 },
+        margin: { l: 60, r: 20, t: 40, b: 60 },
         legend: { x: 0.02, y: 0.98, bgcolor: "rgba(255,255,255,0.8)" },
         annotations,
         hovermode: "closest",
@@ -281,7 +308,7 @@ function renderLedCurrentPlot(dev, divId) {
         title: { text: "LED Current vs PWM Duty", font: { size: 14 } },
         xaxis: { title: "PWM Duty [0–255]", range: [-5, 265] },
         yaxis: { title: "LED Current [mA]", rangemode: "tozero" },
-        margin: { l: 60, r: 20, t: 40, b: 50 },
+        margin: { l: 60, r: 20, t: 40, b: 60 },
         legend: { x: 0.98, y: 0.02, xanchor: "right", yanchor: "bottom", bgcolor: "rgba(255,255,255,0.8)" },
         annotations,
         hovermode: "closest",
