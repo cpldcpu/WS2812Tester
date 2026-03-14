@@ -82,11 +82,29 @@ header h1 {
 /* ── Sidebar ── */
 #sidebar {
     width: var(--sidebar-w);
+    min-width: 160px;
+    max-width: 50vw;
     flex-shrink: 0;
     background: var(--card-bg);
-    border-right: 1px solid var(--border);
+    border-right: none;
     overflow-y: auto;
     padding: 0.6rem 0;
+    position: relative;
+}
+.sidebar-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    cursor: col-resize;
+    background: var(--border);
+    transition: background var(--transition);
+    z-index: 5;
+}
+.sidebar-handle:hover,
+.sidebar-handle.dragging {
+    background: var(--accent);
 }
 #device-list { list-style: none; }
 

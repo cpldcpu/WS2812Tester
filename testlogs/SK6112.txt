@@ -13,6 +13,7 @@ Type	SK6112-RG
 IC	AP6112
 LCSC	C5440833
 Channel Order	RGB
+Comment     ARGB-Gen2
 
 ## txh_sweep
 txh_clocks	prop_x10	p_var_x10	dur_x10	d_var_x10

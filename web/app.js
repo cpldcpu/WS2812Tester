@@ -117,9 +117,11 @@ function renderSummaryTable(panel) {
         <th>0/1 Threshold</th>
         <th>Reset</th>
         <th>Channel Order</th>
+        <th>PWM Freq</th>
         <th>I<sub>on</sub></th>
         <th>I<sub>standby</sub></th>
         <th>PWM Transfer</th>
+        <th>Comment</th>
     </tr></thead>`;
 
     const tbody = document.createElement("tbody");
@@ -136,9 +138,11 @@ function renderSummaryTable(panel) {
             dev.txh && dev.txh.transition_ns != null ? fmt(dev.txh.transition_ns, 0) + " ns" : "",
             dev.reset && dev.reset.threshold_us != null ? fmt(dev.reset.threshold_us, 0) + " &micro;s" : "",
             renderChannelBadges(chOrder),
+            dev.pwm && dev.pwm.pwm_hz != null ? fmt(dev.pwm.pwm_hz, 0) + " Hz" : "",
             dev.pwm && dev.pwm.i_on_ma != null ? fmt(dev.pwm.i_on_ma, 2) + " mA" : "",
             dev.pwm && dev.pwm.i_off_ma != null ? fmt(dev.pwm.i_off_ma, 2) + " mA" : "",
             transfer ? transfer.label : "",
+            info.Comment || "",
         ];
 
         const tr = document.createElement("tr");
@@ -229,6 +233,7 @@ function renderDeviceDetail(dev) {
     if (info.LCSC) {
         specRows.push(["LCSC", `<a href="https://www.lcsc.com/product-detail/${info.LCSC}.html" target="_blank" rel="noopener">${info.LCSC}</a>`]);
     }
+    if (info.Comment) specRows.push(["Comment", info.Comment]);
 
     let keySpecsHTML = '';
     if (specRows.length) {
@@ -480,5 +485,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (err) {
         document.getElementById("detail-panel").innerHTML =
             `<p style="color:red;padding:2rem">Failed to load data: ${err.message}</p>`;
+    }
+
+    // Sidebar resize handle
+    const sidebar = document.getElementById("sidebar");
+    const handle = document.getElementById("sidebar-handle");
+    if (handle) {
+        let dragging = false;
+        handle.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            dragging = true;
+            handle.classList.add("dragging");
+            document.body.style.cursor = "col-resize";
+            document.body.style.userSelect = "none";
+        });
+        document.addEventListener("mousemove", (e) => {
+            if (!dragging) return;
+            const rect = sidebar.parentElement.getBoundingClientRect();
+            const newWidth = e.clientX - rect.left;
+            sidebar.style.width = Math.max(160, Math.min(newWidth, window.innerWidth * 0.5)) + "px";
+        });
+        document.addEventListener("mouseup", () => {
+            if (!dragging) return;
+            dragging = false;
+            handle.classList.remove("dragging");
+            document.body.style.cursor = "";
+            document.body.style.userSelect = "";
+        });
     }
 });

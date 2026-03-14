@@ -180,6 +180,12 @@ def parse_log_file(path: Path) -> ParsedLog:
             continue
 
         if "\t" not in line:
+            # Fallback: treat 2+ spaces as separator for key-value pairs
+            parts = re.split(r"  +", stripped, maxsplit=1)
+            if len(parts) == 2 and parts[0] and parts[1]:
+                current.kv[parts[0]] = parts[1]
+                active_table = None
+                continue
             warnings.append(f"Ignored non-TSV line in section '{current.name}': {stripped[:40]}")
             continue
 
@@ -384,7 +390,7 @@ def extract_device_data(parsed: ParsedLog, rsense_ohm: Optional[float]) -> Dict:
     # Device info
     device_info = {}
     if device:
-        for key in ("Manufacturer", "Type", "IC", "LCSC", "Channel Order"):
+        for key in ("Manufacturer", "Type", "IC", "LCSC", "Channel Order", "Comment"):
             if key in device.kv:
                 device_info[key] = device.kv[key]
 
