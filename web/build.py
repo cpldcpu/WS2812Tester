@@ -541,7 +541,7 @@ def main() -> None:
     print(f"Wrote {data_path} ({len(devices)} devices)")
 
     # Copy static assets
-    for asset in ("index.html", "style.css", "app.js"):
+    for asset in ("index.html", "style.css", "app.js", "logo.png"):
         src = web_dir / asset
         if src.exists():
             shutil.copy2(src, site_dir / asset)

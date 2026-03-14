@@ -92,6 +92,23 @@ function navigate() {
     panel.innerHTML = '<div id="welcome"><div class="welcome-icon">&larr;</div><p>Select a device from the list<br>to view its test results.</p></div>';
 }
 
+// ── Helpers ──
+function renderChannelBadges(order) {
+    return order.split("").map(ch =>
+        `<span class="ch-badge ch-badge-${ch}">${ch}</span>`
+    ).join("");
+}
+
+function getTransferInfo(dev) {
+    if (!dev.led || !dev.led.channels) return null;
+    const chNames = Object.keys(dev.led.channels).sort();
+    const exps = chNames.map(ch => dev.led.channels[ch].power_exp).filter(v => v != null);
+    if (!exps.length) return null;
+    const avgExp = exps.reduce((a, b) => a + b, 0) / exps.length;
+    const nonlinear = Math.abs(avgExp - 1.0) > 0.05;
+    return { label: nonlinear ? "Non-linear" : "Linear", gamma: avgExp };
+}
+
 // ── Device detail ──
 function renderDeviceDetail(dev) {
     const panel = document.getElementById("detail-panel");
@@ -99,51 +116,79 @@ function renderDeviceDetail(dev) {
 
     const info = dev.device_info || {};
     const typeName = info.Type || dev.name;
+    const chOrder = (info["Channel Order"] || dev.channel_order || "GRB").toUpperCase();
 
     // Header
     const header = document.createElement("div");
     header.className = "detail-header";
     header.innerHTML = `<h2>${typeName}</h2>` +
-        (info.Manufacturer ? `<span class="manufacturer-label">${info.Manufacturer}</span>` : "");
+        (info.Manufacturer
+            ? `<div class="manufacturer-line">${info.Manufacturer}</div>`
+            : "");
     panel.appendChild(header);
 
-    // Info row
-    const infoRow = document.createElement("div");
-    infoRow.className = "info-row";
+    // Cards row
+    const cardsRow = document.createElement("div");
+    cardsRow.className = "cards-row";
 
-    const imgWrap = document.createElement("div");
-    imgWrap.className = "device-image";
+    // ── Left card: Device Summary (image + specs side by side) ──
+    const summaryCard = document.createElement("div");
+    summaryCard.className = "card";
+
+    let imageHTML;
     if (dev.image) {
-        imgWrap.innerHTML = `<img src="${dev.image}" alt="${typeName}" loading="lazy">`;
+        imageHTML = `<div class="device-image device-image-zoomable"><img src="${dev.image}" alt="${typeName}" loading="lazy"></div>`;
     } else {
-        imgWrap.innerHTML = `<div class="image-placeholder"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span>No image</span></div>`;
+        imageHTML = `<div class="image-placeholder"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span>No image</span></div>`;
     }
-    infoRow.appendChild(imgWrap);
 
-    // Build grouped info sections
-    const groups = [];
-
-    // ── Device Information ──
-    const deviceRows = [];
-    if (info.Manufacturer) deviceRows.push(["Manufacturer", info.Manufacturer]);
-    if (info.IC && info.IC !== typeName) deviceRows.push(["IC", info.IC]);
+    // Key Specs table
+    const specRows = [];
+    if (info.Manufacturer) specRows.push(["Manufacturer", info.Manufacturer]);
+    if (info.IC && info.IC !== typeName) specRows.push(["IC", info.IC]);
     if (info.LCSC) {
-        const lcsc = info.LCSC;
-        deviceRows.push(["LCSC", `<a href="https://www.lcsc.com/product-detail/${lcsc}.html" target="_blank" rel="noopener">${lcsc}</a>`]);
+        specRows.push(["LCSC", `<a href="https://www.lcsc.com/product-detail/${info.LCSC}.html" target="_blank" rel="noopener">${info.LCSC}</a>`]);
     }
-    if (deviceRows.length) groups.push({ title: "Device", rows: deviceRows });
 
-    // ── Data Interface ──
+    let keySpecsHTML = '';
+    if (specRows.length) {
+        keySpecsHTML += '<div class="summary-section-title">Key Specs</div>';
+        keySpecsHTML += `<table class="summary-table">${specRows.map(([k, v]) =>
+            `<tr><th>${k}</th><td>${v}</td></tr>`).join("")}</table>`;
+    }
+
+    // Tag badges
+    const tags = [];
+    const transfer = getTransferInfo(dev);
+    if (transfer) tags.push(`${transfer.label} Transfer`);
+    tags.push(chOrder);
+    keySpecsHTML += `<div class="tag-row">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>`;
+
+    summaryCard.innerHTML = '<div class="card-title">Device Summary</div>' +
+        `<div class="summary-content"><div class="summary-image">${imageHTML}</div><div class="summary-info">${keySpecsHTML}</div></div>`;
+    cardsRow.appendChild(summaryCard);
+
+    // ── Right card: Performance & Specifications ──
+    const specsCard = document.createElement("div");
+    specsCard.className = "card";
+
+    let specsHTML = '<div class="card-title">Performance &amp; Specifications</div>';
+
+    // Data Interface section
     const ifRows = [];
     if (dev.txh && dev.txh.transition_ns != null)
         ifRows.push(["0/1 Threshold", fmt(dev.txh.transition_ns, 0) + " ns"]);
     if (dev.reset && dev.reset.threshold_us != null)
         ifRows.push(["Reset Threshold", fmt(dev.reset.threshold_us, 2) + " &micro;s"]);
-    if (ifRows.length) groups.push({ title: "Data Interface", rows: ifRows });
+    if (ifRows.length) {
+        specsHTML += '<div class="specs-section-title">Data Interface</div>';
+        specsHTML += `<table class="specs-table">${ifRows.map(([k, v]) =>
+            `<tr><th>${k}</th><td>${v}</td></tr>`).join("")}</table>`;
+    }
 
-    // ── PWM Engine ──
+    // PWM Engine section
     const pwmRows = [];
-    if (info["Channel Order"]) pwmRows.push(["Channel Order", info["Channel Order"]]);
+    pwmRows.push(["Channel Order", renderChannelBadges(chOrder)]);
     if (dev.pwm) {
         if (dev.pwm.pwm_hz != null) pwmRows.push(["PWM Frequency", fmt(dev.pwm.pwm_hz, 0) + " Hz"]);
         if (dev.pwm.i_on_ma != null) pwmRows.push(["I<sub>on</sub> (all CH)", fmt(dev.pwm.i_on_ma, 2) + " mA"]);
@@ -153,31 +198,26 @@ function renderDeviceDetail(dev) {
         const chNames = Object.keys(dev.led.channels).sort();
         const iMaxParts = chNames.map(ch => {
             const c = dev.led.channels[ch];
-            const order = (dev.channel_order || "GRB").toUpperCase();
+            const order = chOrder;
             const idx = parseInt(ch.replace("CH", ""), 10) - 1;
             const letter = order[idx] || "?";
             return c.on_max != null ? `${letter}=${fmt(c.on_max, 1)}` : null;
         }).filter(Boolean);
         if (iMaxParts.length) pwmRows.push(["I<sub>max</sub> per channel", iMaxParts.join(", ") + " mA"]);
-
-        const exps = chNames.map(ch => dev.led.channels[ch].power_exp).filter(v => v != null);
-        if (exps.length) {
-            const avgExp = exps.reduce((a, b) => a + b, 0) / exps.length;
-            const nonlinear = Math.abs(avgExp - 1.0) > 0.05;
-            const label = nonlinear ? "Non-linear" : "Linear";
-            pwmRows.push(["PWM Transfer", `${label} (&gamma;=${fmt(avgExp, 2)})`]);
-        }
     }
-    if (pwmRows.length) groups.push({ title: "PWM Engine", rows: pwmRows });
+    const transfer2 = getTransferInfo(dev);
+    if (transfer2) {
+        pwmRows.push(["PWM Transfer", `${transfer2.label} (&gamma;=${fmt(transfer2.gamma, 2)})`]);
+    }
+    if (pwmRows.length) {
+        specsHTML += '<div class="specs-section-title">PWM Engine</div>';
+        specsHTML += `<table class="specs-table">${pwmRows.map(([k, v]) =>
+            `<tr><th>${k}</th><td>${v}</td></tr>`).join("")}</table>`;
+    }
 
-    const infoTable = document.createElement("div");
-    infoTable.className = "info-table";
-    infoTable.innerHTML = groups.map(g =>
-        `<h4 class="info-group-title">${g.title}</h4>` +
-        `<table>${g.rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join("")}</table>`
-    ).join("");
-    infoRow.appendChild(infoTable);
-    panel.appendChild(infoRow);
+    specsCard.innerHTML = specsHTML;
+    cardsRow.appendChild(specsCard);
+    panel.appendChild(cardsRow);
 
     // Plots
     const plotsRow = document.createElement("div");
@@ -199,6 +239,18 @@ function renderDeviceDetail(dev) {
         renderTimingPlot(dev, timingDiv.id);
         renderLedCurrentPlot(dev, ledDiv.id);
     });
+
+    // Image lightbox
+    const zoomImg = panel.querySelector(".device-image-zoomable img");
+    if (zoomImg) {
+        zoomImg.addEventListener("click", () => {
+            const overlay = document.createElement("div");
+            overlay.className = "lightbox";
+            overlay.innerHTML = `<img src="${zoomImg.src}" alt="${zoomImg.alt}">`;
+            overlay.addEventListener("click", () => overlay.remove());
+            document.body.appendChild(overlay);
+        });
+    }
 }
 
 // ── Timing plot ──
@@ -267,6 +319,25 @@ function renderLedCurrentPlot(dev, divId) {
 
     const traces = [];
     const channels = Object.keys(led.channels).sort();
+
+    // Find max duty/current across all channels for the linearity reference line
+    let maxDuty = 0, maxCurrent = 0;
+    for (const ch of channels) {
+        const c = led.channels[ch];
+        const baseline = c.baseline || 0;
+        for (let i = 0; i < c.duty.length; i++) {
+            const cur = c.values[i] != null ? c.values[i] - baseline : 0;
+            if (cur > maxCurrent) { maxCurrent = cur; maxDuty = c.duty[i]; }
+        }
+    }
+    if (maxCurrent > 0) {
+        traces.push({
+            x: [0, maxDuty], y: [0, maxCurrent],
+            mode: "lines", type: "scatter",
+            line: { color: "#ccc", dash: "dash", width: 1 },
+            showlegend: false, hoverinfo: "skip",
+        });
+    }
 
     for (const ch of channels) {
         const c = led.channels[ch];
