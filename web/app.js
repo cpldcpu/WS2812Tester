@@ -114,13 +114,13 @@ function renderSummaryTable(panel) {
         <th></th>
         <th>Manufacturer</th>
         <th>Device</th>
-        <th>0/1 Threshold</th>
-        <th>Reset</th>
-        <th>Channel Order</th>
-        <th>PWM Freq</th>
-        <th>I<sub>on</sub></th>
-        <th>I<sub>standby</sub></th>
-        <th>PWM Transfer</th>
+        <th title="High-time threshold where transmitted bits flip from 0 to 1 on Dout">0/1 Threshold</th>
+        <th title="Minimum idle time on DiN to reset the ARGB state machine">Reset</th>
+        <th title="Order of color channels in the serial data stream">Channel Order</th>
+        <th title="Internal PWM frequency used by the ARGB LED driver">PWM Freq</th>
+        <th title="Quiescent current with all LEDs off (PWM driver idle)">I<sub>standby</sub></th>
+        <th title="Peak LED current per color channel at full brightness">I<sub>max</sub> per channel</th>
+        <th title="Transfer function mapping PWM setting to average LED current">PWM Transfer</th>
         <th>Comment</th>
     </tr></thead>`;
 
@@ -139,8 +139,18 @@ function renderSummaryTable(panel) {
             dev.reset && dev.reset.threshold_us != null ? fmt(dev.reset.threshold_us, 0) + " &micro;s" : "",
             renderChannelBadges(chOrder),
             dev.pwm && dev.pwm.pwm_hz != null ? fmt(dev.pwm.pwm_hz, 0) + " Hz" : "",
-            dev.pwm && dev.pwm.i_on_ma != null ? fmt(dev.pwm.i_on_ma, 2) + " mA" : "",
             dev.pwm && dev.pwm.i_off_ma != null ? fmt(dev.pwm.i_off_ma, 2) + " mA" : "",
+            (() => {
+                if (!dev.led || !dev.led.channels) return "";
+                const chNames = Object.keys(dev.led.channels).sort();
+                const parts = chNames.map(ch => {
+                    const c = dev.led.channels[ch];
+                    const idx = parseInt(ch.replace("CH", ""), 10) - 1;
+                    const letter = chOrder[idx] || "?";
+                    return c.on_max != null ? `${letter}=${fmt(c.on_max, 1)}` : null;
+                }).filter(Boolean);
+                return parts.length ? parts.join(", ") + " mA" : "";
+            })(),
             transfer ? transfer.label : "",
             info.Comment || "",
         ];
@@ -276,7 +286,6 @@ function renderDeviceDetail(dev) {
     pwmRows.push(["Channel Order", renderChannelBadges(chOrder)]);
     if (dev.pwm) {
         if (dev.pwm.pwm_hz != null) pwmRows.push(["PWM Frequency", fmt(dev.pwm.pwm_hz, 0) + " Hz"]);
-        if (dev.pwm.i_on_ma != null) pwmRows.push(["I<sub>on</sub> (all CH)", fmt(dev.pwm.i_on_ma, 2) + " mA"]);
         if (dev.pwm.i_off_ma != null) pwmRows.push(["I<sub>standby</sub>", fmt(dev.pwm.i_off_ma, 2) + " mA"]);
     }
     if (dev.led && dev.led.channels) {
@@ -286,9 +295,9 @@ function renderDeviceDetail(dev) {
             const order = chOrder;
             const idx = parseInt(ch.replace("CH", ""), 10) - 1;
             const letter = order[idx] || "?";
-            return c.on_max != null ? `${letter}=${fmt(c.on_max, 1)}` : null;
+            return c.on_max != null ? `${letter}=${fmt(c.on_max, 1)} mA` : null;
         }).filter(Boolean);
-        if (iMaxParts.length) pwmRows.push(["I<sub>max</sub> per channel", iMaxParts.join(", ") + " mA"]);
+        if (iMaxParts.length) pwmRows.push(["I<sub>max</sub> per channel", iMaxParts.join(",&ensp;")]);
     }
     const transfer2 = getTransferInfo(dev);
     if (transfer2) {
